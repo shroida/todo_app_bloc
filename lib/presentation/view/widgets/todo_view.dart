@@ -40,7 +40,7 @@ class TodoView extends StatelessWidget {
         );
       },
     );
-    
+
   }
 
   @override
@@ -64,6 +64,7 @@ class TodoView extends StatelessWidget {
                     context.read<TodoCubit>().updateTodo(todo);
                   },
                 ),
+                
                 onLongPress: () {
                   context.read<TodoCubit>().deleteTodo(todo);
                 },
