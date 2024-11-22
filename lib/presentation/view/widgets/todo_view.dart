@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app_bloc/presentation/todo_cubit.dart';
 import 'package:todo_app_bloc/domain/data/models/todo.dart';
+import 'package:todo_app_bloc/presentation/view/widgets/floating_button_container.dart';
+import 'package:todo_app_bloc/presentation/view/widgets/show_add_dialog.dart';
+import 'package:todo_app_bloc/presentation/view/widgets/todo_item.dart';
 
 class TodoView extends StatelessWidget {
   const TodoView({super.key});
@@ -13,42 +16,26 @@ class TodoView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Todo'),
-          content: TextField(
-            controller: textController,
-            decoration: const InputDecoration(hintText: 'Enter todo text'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final todoText = textController.text;
-                if (todoText.isNotEmpty) {
-                  todoCubit.addTodo(todoText);
-                }
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
+        return DialogToAdd(
+            textController: textController, todoCubit: todoCubit);
       },
     );
-
   }
 
   @override
   Widget build(BuildContext context) {
+    final todoCubit = context.read<TodoCubit>();
+
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () => _showAddTodoBox(context),
+      appBar: AppBar(
+        title: BlocBuilder<TodoCubit, List<Todo>>(
+          builder: (context, todos) {
+            return Text('Todo Count: ${todoCubit.todoCount}');
+          },
+        ),
+      ),
+      floatingActionButton: FloatingButtonContainer(
+        callbackFunction: _showAddTodoBox,
       ),
       body: BlocBuilder<TodoCubit, List<Todo>>(
         builder: (context, todos) {
@@ -56,23 +43,33 @@ class TodoView extends StatelessWidget {
             itemCount: todos.length,
             itemBuilder: (context, index) {
               final todo = todos[index];
-              return ListTile(
-                title: Text(todo.text),
-                trailing: Checkbox(
-                  value: todo.isCompleted,
-                  onChanged: (bool? value) {
-                    context.read<TodoCubit>().updateTodo(todo);
-                  },
-                ),
-                
-                onLongPress: () {
-                  context.read<TodoCubit>().deleteTodo(todo);
-                },
+              return Container(
+                height: 100,
+                decoration: boxDecoration(),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15.0, horizontal: 16.0),
+                margin: const EdgeInsets.all(5),
+                child: TodoItem(todo: todo),
               );
             },
           );
         },
       ),
+    );
+  }
+
+  BoxDecoration boxDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.5),
+          spreadRadius: 5,
+          blurRadius: 7,
+          offset: const Offset(3, 3),
+        ),
+      ],
     );
   }
 }

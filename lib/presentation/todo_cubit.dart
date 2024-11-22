@@ -9,9 +9,16 @@ class TodoCubit extends Cubit<List<Todo>> {
     loadTodos();
   }
 
+  int todoCount = 0;
   Future<void> loadTodos() async {
-    final todoList = await todoRepo.getTodos();
-    emit(todoList);
+    try {
+      final todoList = await todoRepo.getTodos();
+      todoCount=todoList.length;
+      emit(todoList);
+    } catch (e) {
+      // Handle error, e.g., log or show a message
+      emit([]);
+    }
   }
 
   Future<void> addTodo(String text) async {
@@ -34,6 +41,9 @@ class TodoCubit extends Cubit<List<Todo>> {
   }
 
   Future<void> toggleCompletation(Todo todo) async {
-    todo.toggleCompletion();
+    final updatedTodo = todo.toggleCompletion();
+    await todoRepo.updateTodo(updatedTodo);
+
+    loadTodos();
   }
 }
