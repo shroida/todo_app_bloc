@@ -1,10 +1,14 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:todo_app_bloc/domain/data/models/database_helper.dart';
 import 'package:todo_app_bloc/domain/data/models/todo.dart';
 import 'package:todo_app_bloc/domain/repository/todo_repo.dart';
 
-class TodoRepoImpl extends TodoRepo {
+class TodoRepoImpl implements TodoRepo {
   // Initialize the database
+  final DatabaseHelper dbHelper;
+  TodoRepoImpl(this.dbHelper);
+
   static Future<Database> _initializeDb() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'todo_app.db');
